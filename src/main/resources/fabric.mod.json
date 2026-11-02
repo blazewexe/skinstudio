@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "skin_studio",
+  "version": "${version}",
+  "name": "Skin Studio",
+  "description": "Import, preview, organize, and apply player skins from the client.",
+  "authors": ["Skin Studio contributors"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.skinstudio.SkinStudioClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
