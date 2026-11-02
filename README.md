@@ -22,7 +22,7 @@ Builds are version-specific. To make a build for a different game version, updat
 1. Open Skin Studio from the **Skin Studio** button at the bottom of the Escape menu, or press **P**. You can change the shortcut under **Options → Controls → Key Binds → Skin Studio**.
 2. Choose an import type and enter a Minecraft name, Ely.by name or supported skin URL, a direct PNG URL, or a local PNG path.
 3. Import and review the validated skin. Standard 64×64 and legacy 64×32 PNGs are accepted. The library stores image files by SHA-256 under `.minecraft/config/skin-studio/cache/skins` and metadata in `library.json`.
-4. Configure a MineSkin API key as the environment variable `SKINSTUDIO_MINESKIN_API_KEY`, then fully restart the launcher. The mod does not store the key in its JSON files. MineSkin requires an account and API key for API requests.
+4. Create a MineSkin account and API key at [account.mineskin.org](https://account.mineskin.org/). To enter the key in game, open **Settings** in Skin Studio, paste it in the masked field, and click **Use this key**. It stays in memory until Minecraft closes and is not saved to disk. For a persistent alternative on Windows, search Start for **Edit environment variables for your account**, add a user variable named `SKINSTUDIO_MINESKIN_API_KEY`, and paste the key as its value; fully close and reopen Freesm Launcher after saving it. MineSkin requires an account and API key for API requests.
 5. Click **Upload to MineSkin** and approve the upload. The image is sent to MineSkin as an unlisted skin-generation request. Uploads cannot currently be canceled after submission.
 6. After the provider returns a texture URL, click **Apply uploaded skin**. Inspect the exact command and select **Send command**.
 

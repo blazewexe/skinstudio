@@ -12,6 +12,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import com.mojang.blaze3d.Blaze3D;
 
 import java.awt.image.BufferedImage;
@@ -26,6 +28,7 @@ public final class SkinStudioScreen extends Screen {
     private SkinResolver.Source source = SkinResolver.Source.MOJANG;
     private EditBox input;
     private EditBox template;
+    private EditBox apiKeyInput;
     private String status = "Choose an input, then import a skin.";
     private boolean busy;
     private boolean favoriteOnly;
@@ -100,6 +103,15 @@ public final class SkinStudioScreen extends Screen {
                 .bounds(left, 218, 94, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Report an issue"), b -> openLink("https://github.com/blazewexe/skinstudio/issues"))
                 .bounds(left + 100, 218, 110, 20).build());
+        apiKeyInput = new EditBox(font, left, 258, 300, 20, Component.literal("MineSkin API key"));
+        apiKeyInput.setMaxLength(512);
+        apiKeyInput.addFormatter((text, offset) -> FormattedCharSequence.forward("•".repeat(text.length()), Style.EMPTY));
+        addRenderableWidget(apiKeyInput);
+        addRenderableWidget(Button.builder(Component.literal("Use this key"), b -> setSessionApiKey())
+                .bounds(left + 306, 258, 100, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Clear session key"), b -> {
+            SkinStudioClient.clearSessionMineSkinApiKey(); apiKeyInput.setValue(""); status = "Session MineSkin key cleared.";
+        }).bounds(left, 284, 130, 20).build());
     }
 
     private String sourceLabel() { return switch (source) { case MOJANG -> "Minecraft name"; case ELY_BY -> "Ely.by name"; case URL -> "Direct URL"; case LOCAL -> "Local PNG path"; }; }
@@ -134,7 +146,7 @@ public final class SkinStudioScreen extends Screen {
         Minecraft.getInstance().gui.setScreen(new ConsentScreen(this, selected.displayName, () -> {
             busy = true; status = "Uploading PNG to api.mineskin.org…";
             SkinEntry uploading = selected;
-            SkinStudioClient.upload(uploading, text -> { busy = false; if (text.startsWith("https://") || text.startsWith("http://")) { status = "MineSkin returned a texture URL. Review it on the server command screen."; uploadValue = text; uploadedSkinId = uploading.id; } else { status = text; uploadValue = null; uploadedSkinId = null; } });
+            SkinStudioClient.upload(uploading, message -> status = message, text -> { busy = false; if (text.startsWith("https://") || text.startsWith("http://")) { status = "MineSkin returned a texture URL. Review it on the server command screen."; uploadValue = text; uploadedSkinId = uploading.id; } else { status = text; uploadValue = null; uploadedSkinId = null; } });
         }));
     }
     private String uploadValue;
@@ -167,6 +179,14 @@ public final class SkinStudioScreen extends Screen {
         catch (Exception e) { status = "Could not open the link. Visit " + address; }
     }
 
+    private void setSessionApiKey() {
+        String key = apiKeyInput.getValue().trim();
+        if (key.isBlank()) { status = "Paste your MineSkin API key first."; return; }
+        SkinStudioClient.setSessionMineSkinApiKey(key);
+        apiKeyInput.setValue("");
+        status = "MineSkin key is set for this session only; it is not saved to disk.";
+    }
+
     private void changePage(Page next) { page = next; rebuildWidgets(); }
     private String rootMessage(Throwable error) { Throwable value = error; while (value.getCause() != null) value = value.getCause(); return value.getMessage() == null ? "Import failed." : value.getMessage(); }
     private String shorten(String s, int n) { return s.length() <= n ? s : s.substring(0, n - 1) + "…"; }
@@ -189,9 +209,10 @@ public final class SkinStudioScreen extends Screen {
         if (page == Page.SETTINGS) {
             context.text(font, "Server: " + SkinStudioClient.serverAddress(), left, 78, 0xDDE6F1);
             context.text(font, "SkinsRestorer command template. Use {value} and {model}.", left, 94, 0xAEBBC9);
-            context.text(font, "MineSkin API key comes from SKINSTUDIO_MINESKIN_API_KEY.", left, 174, 0xAEBBC9);
+            context.text(font, "MineSkin uploads need an API key. Add one below.", left, 174, 0xAEBBC9);
             context.text(font, "The key is not written to the config directory.", left, 190, 0xAEBBC9);
             context.text(font, "Open Skin Studio: P (change in Options → Controls).", left, 202, 0xAEBBC9);
+            context.text(font, "MineSkin API key (masked; session only):", left, 240, 0xAEBBC9);
         }
     }
 

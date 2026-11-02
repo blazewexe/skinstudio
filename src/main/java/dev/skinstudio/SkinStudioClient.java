@@ -27,6 +27,7 @@ public final class SkinStudioClient implements ClientModInitializer {
     public static final SkinResolver RESOLVER = new SkinResolver(LIBRARY);
     public static final MineSkinProvider UPLOADER = new MineSkinProvider();
     public static final ServerProfiles SERVER_PROFILES = new ServerProfiles();
+    private static volatile String sessionMineSkinApiKey;
     public static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Skin Studio upload"); thread.setDaemon(true); return thread;
     });
@@ -46,15 +47,29 @@ public final class SkinStudioClient implements ClientModInitializer {
         return "singleplayer";
     }
 
-    public static void upload(SkinEntry entry, Consumer<String> result) {
+    public static void upload(SkinEntry entry, Consumer<String> progress, Consumer<String> result) {
         CompletableFuture.supplyAsync(() -> {
-            try { return UPLOADER.upload(entry, LIBRARY.assetPath(entry)); }
+            try { return UPLOADER.upload(entry, LIBRARY.assetPath(entry), mineSkinApiKey(), message ->
+                    Minecraft.getInstance().execute(() -> progress.accept(message))); }
             catch (Exception e) { throw new RuntimeException(e.getMessage() == null ? "Upload failed." : e.getMessage(), e); }
         }, WORKER).whenComplete((url, error) -> Minecraft.getInstance().execute(() -> {
             Throwable cause = error;
             while (cause != null && cause.getCause() != null) cause = cause.getCause();
             result.accept(error == null ? url : (cause.getMessage() == null ? "Upload failed." : cause.getMessage()));
         }));
+    }
+
+    public static void setSessionMineSkinApiKey(String key) {
+        sessionMineSkinApiKey = key == null || key.isBlank() ? null : key.trim();
+    }
+
+    public static void clearSessionMineSkinApiKey() {
+        sessionMineSkinApiKey = null;
+    }
+
+    private static String mineSkinApiKey() {
+        String key = sessionMineSkinApiKey;
+        return key == null ? System.getenv("SKINSTUDIO_MINESKIN_API_KEY") : key;
     }
 
     public static void toast(String message) {
