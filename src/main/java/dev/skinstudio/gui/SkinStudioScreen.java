@@ -191,7 +191,7 @@ public final class SkinStudioScreen extends Screen {
             context.text(font, "SkinsRestorer command template. Use {value} and {model}.", left, 94, 0xAEBBC9);
             context.text(font, "MineSkin API key comes from SKINSTUDIO_MINESKIN_API_KEY.", left, 174, 0xAEBBC9);
             context.text(font, "The key is not written to the config directory.", left, 190, 0xAEBBC9);
-            context.text(font, "Open Skin Studio: Right Alt (change in Options → Controls).", left, 202, 0xAEBBC9);
+            context.text(font, "Open Skin Studio: P (change in Options → Controls).", left, 202, 0xAEBBC9);
         }
     }
 

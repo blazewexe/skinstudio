@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "package": "dev.skinstudio.mixin",
+  "client": [
+    "PauseScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
