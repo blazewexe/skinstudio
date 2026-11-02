@@ -2,6 +2,7 @@ package dev.skinstudio;
 
 import dev.skinstudio.gui.SkinStudioScreen;
 import dev.skinstudio.service.MineSkinProvider;
+import dev.skinstudio.service.MineSkinSettings;
 import dev.skinstudio.service.ServerProfiles;
 import dev.skinstudio.service.SkinLibrary;
 import dev.skinstudio.service.SkinResolver;
@@ -26,8 +27,8 @@ public final class SkinStudioClient implements ClientModInitializer {
     public static final SkinLibrary LIBRARY = new SkinLibrary();
     public static final SkinResolver RESOLVER = new SkinResolver(LIBRARY);
     public static final MineSkinProvider UPLOADER = new MineSkinProvider();
+    public static final MineSkinSettings MINESKIN_SETTINGS = new MineSkinSettings();
     public static final ServerProfiles SERVER_PROFILES = new ServerProfiles();
-    private static volatile String sessionMineSkinApiKey;
     public static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Skin Studio upload"); thread.setDaemon(true); return thread;
     });
@@ -59,16 +60,16 @@ public final class SkinStudioClient implements ClientModInitializer {
         }));
     }
 
-    public static void setSessionMineSkinApiKey(String key) {
-        sessionMineSkinApiKey = key == null || key.isBlank() ? null : key.trim();
+    public static void setMineSkinApiKey(String key) throws Exception {
+        MINESKIN_SETTINGS.setApiKey(key);
     }
 
-    public static void clearSessionMineSkinApiKey() {
-        sessionMineSkinApiKey = null;
+    public static void clearMineSkinApiKey() throws Exception {
+        MINESKIN_SETTINGS.clearApiKey();
     }
 
     private static String mineSkinApiKey() {
-        String key = sessionMineSkinApiKey;
+        String key = MINESKIN_SETTINGS.getApiKey();
         return key == null ? System.getenv("SKINSTUDIO_MINESKIN_API_KEY") : key;
     }
 

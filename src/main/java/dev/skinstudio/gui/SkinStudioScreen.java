@@ -107,10 +107,11 @@ public final class SkinStudioScreen extends Screen {
         apiKeyInput.setMaxLength(512);
         apiKeyInput.addFormatter((text, offset) -> FormattedCharSequence.forward("•".repeat(text.length()), Style.EMPTY));
         addRenderableWidget(apiKeyInput);
-        addRenderableWidget(Button.builder(Component.literal("Use this key"), b -> setSessionApiKey())
+        addRenderableWidget(Button.builder(Component.literal("Save key"), b -> setPersistentApiKey())
                 .bounds(left + 306, 258, 100, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Clear session key"), b -> {
-            SkinStudioClient.clearSessionMineSkinApiKey(); apiKeyInput.setValue(""); status = "Session MineSkin key cleared.";
+        addRenderableWidget(Button.builder(Component.literal("Forget saved key"), b -> {
+            try { SkinStudioClient.clearMineSkinApiKey(); apiKeyInput.setValue(""); status = "Saved MineSkin key deleted."; }
+            catch (Exception e) { status = "Could not delete saved key: " + e.getMessage(); }
         }).bounds(left, 284, 130, 20).build());
     }
 
@@ -162,8 +163,8 @@ public final class SkinStudioScreen extends Screen {
             if (Minecraft.getInstance().getConnection() == null) { status = "Connect to a multiplayer server before applying."; return; }
             Minecraft.getInstance().getConnection().sendCommand(ready);
             selected.lastUsedAt = System.currentTimeMillis(); SkinStudioClient.LIBRARY.add(selected);
-            status = "Command sent. The server has not confirmed that the skin was applied.";
-            SkinStudioClient.toast("Command sent; check the server response for success or permission errors.");
+            status = "Command sent. Check chat for the server's result; URL permission or server support may be required.";
+            SkinStudioClient.toast("Command sent; check chat for success or a server permission/error message.");
         }));
     }
 
@@ -179,12 +180,16 @@ public final class SkinStudioScreen extends Screen {
         catch (Exception e) { status = "Could not open the link. Visit " + address; }
     }
 
-    private void setSessionApiKey() {
+    private void setPersistentApiKey() {
         String key = apiKeyInput.getValue().trim();
         if (key.isBlank()) { status = "Paste your MineSkin API key first."; return; }
-        SkinStudioClient.setSessionMineSkinApiKey(key);
-        apiKeyInput.setValue("");
-        status = "MineSkin key is set for this session only; it is not saved to disk.";
+        try {
+            SkinStudioClient.setMineSkinApiKey(key);
+            apiKeyInput.setValue("");
+            status = "MineSkin key saved locally and will load next time you start Minecraft.";
+        } catch (Exception e) {
+            status = "Could not save MineSkin key: " + e.getMessage();
+        }
     }
 
     private void changePage(Page next) { page = next; rebuildWidgets(); }
@@ -209,10 +214,14 @@ public final class SkinStudioScreen extends Screen {
         if (page == Page.SETTINGS) {
             context.text(font, "Server: " + SkinStudioClient.serverAddress(), left, 78, 0xDDE6F1);
             context.text(font, "SkinsRestorer command template. Use {value} and {model}.", left, 94, 0xAEBBC9);
-            context.text(font, "MineSkin uploads need an API key. Add one below.", left, 174, 0xAEBBC9);
-            context.text(font, "The key is not written to the config directory.", left, 190, 0xAEBBC9);
+            context.text(font, "MineSkin uploads need an API key. Save yours below.", left, 174, 0xAEBBC9);
+            context.text(font, "Saved locally in .minecraft/config/skin-studio.", left, 190, 0xAEBBC9);
+            boolean keyConfigured = SkinStudioClient.MINESKIN_SETTINGS.hasApiKey()
+                    || System.getenv("SKINSTUDIO_MINESKIN_API_KEY") != null;
+            context.text(font, keyConfigured ? "MineSkin key: configured" : "MineSkin key: not configured",
+                    left, 222, keyConfigured ? 0x8FE0C6 : 0xE6B86A);
             context.text(font, "Open Skin Studio: P (change in Options → Controls).", left, 202, 0xAEBBC9);
-            context.text(font, "MineSkin API key (masked; session only):", left, 240, 0xAEBBC9);
+            context.text(font, "MineSkin API key (masked; saved on this computer):", left, 240, 0xAEBBC9);
         }
     }
 
