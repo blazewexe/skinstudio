@@ -22,7 +22,7 @@ public final class ApplyConfirmScreen extends Screen {
                 .bounds(x + 100, height / 2 + 45, 92, 20).build());
     }
     @Override public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        extractBackground(context, mouseX, mouseY, delta);
+        context.fill(0, 0, width, height, 0xFF0B1119);
         context.centeredText(font, "Send this command to the current server?", width / 2, height / 2 - 38, 0xFFFFFF);
         context.centeredText(font, "The server may deny it or reject the skin URL.", width / 2, height / 2 - 20, 0xB9C4D0);
         context.fill(width / 2 - 190, height / 2 - 2, width / 2 + 190, height / 2 + 32, 0xFF101722);

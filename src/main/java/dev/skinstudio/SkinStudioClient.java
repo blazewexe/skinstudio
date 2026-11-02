@@ -9,10 +9,14 @@ import dev.skinstudio.model.SkinEntry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public final class SkinStudioClient implements ClientModInitializer {
+    private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(
+            ResourceLocation.fromNamespaceAndPath("skin_studio", "main"));
     public static final SkinLibrary LIBRARY = new SkinLibrary();
     public static final SkinResolver RESOLVER = new SkinResolver(LIBRARY);
     public static final MineSkinProvider UPLOADER = new MineSkinProvider();
@@ -31,9 +37,17 @@ public final class SkinStudioClient implements ClientModInitializer {
 
     @Override public void onInitializeClient() {
         openKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.skin_studio.open", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, KeyMapping.Category.MISC));
+                "key.skin_studio.open", InputConstants.Type.KEYBOARD, InputConstants.KEY_RIGHT_ALT, KEY_CATEGORY));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openKey.consumeClick()) client.gui.setScreen(new SkinStudioScreen(null));
+        });
+        // Keep a reliable entry point on Escape even if the user's keybind is changed.
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (screen instanceof PauseScreen) {
+                screen.addRenderableWidget(Button.builder(Component.literal("Skin Studio"), button ->
+                        client.gui.setScreen(new SkinStudioScreen(null)))
+                        .bounds(scaledWidth / 2 - 100, scaledHeight - 32, 200, 20).build());
+            }
         });
     }
 

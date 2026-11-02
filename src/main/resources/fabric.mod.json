@@ -4,8 +4,13 @@
   "version": "${version}",
   "name": "Skin Studio",
   "description": "Import, preview, organize, and apply player skins from the client.",
+  "icon": "assets/skin_studio/icon.png",
   "authors": ["Skin Studio contributors"],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/blazewexe/skinstudio",
+    "sources": "https://github.com/blazewexe/skinstudio",
+    "issues": "https://github.com/blazewexe/skinstudio/issues"
+  },
   "license": "MIT",
   "environment": "client",
   "entrypoints": {

@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.Blaze3D;
 
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
@@ -95,6 +96,10 @@ public final class SkinStudioScreen extends Screen {
         template.setMaxLength(256); template.setValue(profile.commandTemplate); addRenderableWidget(template);
         addRenderableWidget(Button.builder(Component.literal("Save server profile"), b -> saveSettings())
                 .bounds(left, 138, 140, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Website"), b -> openLink("https://github.com/blazewexe/skinstudio"))
+                .bounds(left, 218, 94, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Report an issue"), b -> openLink("https://github.com/blazewexe/skinstudio/issues"))
+                .bounds(left + 100, 218, 110, 20).build());
     }
 
     private String sourceLabel() { return switch (source) { case MOJANG -> "Minecraft name"; case ELY_BY -> "Ely.by name"; case URL -> "Direct URL"; case LOCAL -> "Local PNG path"; }; }
@@ -157,12 +162,19 @@ public final class SkinStudioScreen extends Screen {
         status = "Saved command profile for " + SkinStudioClient.serverAddress() + ".";
     }
 
+    private void openLink(String address) {
+        try { Blaze3D.openUri(java.net.URI.create(address)); }
+        catch (Exception e) { status = "Could not open the link. Visit " + address; }
+    }
+
     private void changePage(Page next) { page = next; rebuildWidgets(); }
     private String rootMessage(Throwable error) { Throwable value = error; while (value.getCause() != null) value = value.getCause(); return value.getMessage() == null ? "Import failed." : value.getMessage(); }
     private String shorten(String s, int n) { return s.length() <= n ? s : s.substring(0, n - 1) + "…"; }
 
     @Override public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        extractBackground(context, mouseX, mouseY, delta);
+        // Avoid requesting a second blur pass; Iris and other 26.3 UI mods may
+        // already have added one to this frame's render state.
+        context.fill(0, 0, width, height, 0xFF0B1119);
         int left = width / 2 - 205;
         context.fill(left - 12, 18, left + 418, height - 18, 0xEF111923);
         context.text(font, "SKIN STUDIO", left, 24, 0x8FE0C6);
@@ -179,6 +191,7 @@ public final class SkinStudioScreen extends Screen {
             context.text(font, "SkinsRestorer command template. Use {value} and {model}.", left, 94, 0xAEBBC9);
             context.text(font, "MineSkin API key comes from SKINSTUDIO_MINESKIN_API_KEY.", left, 174, 0xAEBBC9);
             context.text(font, "The key is not written to the config directory.", left, 190, 0xAEBBC9);
+            context.text(font, "Open Skin Studio: Right Alt (change in Options → Controls).", left, 202, 0xAEBBC9);
         }
     }
 
@@ -202,7 +215,7 @@ public final class SkinStudioScreen extends Screen {
             addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> Minecraft.getInstance().gui.setScreen(parent)).bounds(x + 138, height / 2 + 32, 72, 20).build());
         }
         @Override public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-            extractBackground(context, mouseX, mouseY, delta);
+            context.fill(0, 0, width, height, 0xFF0B1119);
             context.centeredText(font, "Send this PNG to MineSkin?", width / 2, height / 2 - 40, 0xFFFFFF);
             context.centeredText(font, shortenStatic(skinName, 48), width / 2, height / 2 - 21, 0x8FE0C6);
             context.centeredText(font, "MineSkin receives the image and processes it for a texture URL.", width / 2, height / 2 - 2, 0xC4D0DE);

@@ -19,7 +19,7 @@ Builds are version-specific. To make a build for a different game version, updat
 
 ## Use
 
-1. Join a server and press **K** to open Skin Studio.
+1. Open Skin Studio from the **Skin Studio** button at the bottom of the Escape menu, or press **Right Alt**. You can change the shortcut under **Options → Controls → Key Binds → Skin Studio**.
 2. Choose an import type and enter a Minecraft name, Ely.by name or supported skin URL, a direct PNG URL, or a local PNG path.
 3. Import and review the validated skin. Standard 64×64 and legacy 64×32 PNGs are accepted. The library stores image files by SHA-256 under `.minecraft/config/skin-studio/cache/skins` and metadata in `library.json`.
 4. Configure a MineSkin API key as the environment variable `SKINSTUDIO_MINESKIN_API_KEY`, then fully restart the launcher. The mod does not store the key in its JSON files. MineSkin requires an account and API key for API requests.
