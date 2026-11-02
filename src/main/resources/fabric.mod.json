@@ -12,9 +12,9 @@
     "client": ["dev.skinstudio.SkinStudioClient"]
   },
   "depends": {
-    "fabricloader": ">=0.16.10",
-    "minecraft": "1.21.1",
-    "java": ">=21",
+    "fabricloader": ">=0.20.1",
+    "minecraft": "26.3",
+    "java": ">=25",
     "fabric-api": "*"
   }
 }

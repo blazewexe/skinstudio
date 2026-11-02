@@ -8,12 +8,11 @@ import dev.skinstudio.service.SkinResolver;
 import dev.skinstudio.model.SkinEntry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import org.lwjgl.glfw.GLFW;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.Component;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -28,18 +27,19 @@ public final class SkinStudioClient implements ClientModInitializer {
     public static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Skin Studio upload"); thread.setDaemon(true); return thread;
     });
-    private KeyBinding openKey;
+    private KeyMapping openKey;
 
     @Override public void onInitializeClient() {
-        openKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.skin_studio.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "category.skin_studio"));
+        openKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.skin_studio.open", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (openKey.wasPressed()) client.setScreen(new SkinStudioScreen(null));
+            if (openKey.consumeClick()) client.gui.setScreen(new SkinStudioScreen(null));
         });
     }
 
     public static String serverAddress() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.getCurrentServerEntry() != null) return client.getCurrentServerEntry().address;
+        Minecraft client = Minecraft.getInstance();
+        if (client.getCurrentServer() != null) return client.getCurrentServer().ip;
         return "singleplayer";
     }
 
@@ -47,7 +47,7 @@ public final class SkinStudioClient implements ClientModInitializer {
         CompletableFuture.supplyAsync(() -> {
             try { return UPLOADER.upload(entry, LIBRARY.assetPath(entry)); }
             catch (Exception e) { throw new RuntimeException(e.getMessage() == null ? "Upload failed." : e.getMessage(), e); }
-        }, WORKER).whenComplete((url, error) -> MinecraftClient.getInstance().execute(() -> {
+        }, WORKER).whenComplete((url, error) -> Minecraft.getInstance().execute(() -> {
             Throwable cause = error;
             while (cause != null && cause.getCause() != null) cause = cause.getCause();
             result.accept(error == null ? url : (cause.getMessage() == null ? "Upload failed." : cause.getMessage()));
@@ -55,6 +55,6 @@ public final class SkinStudioClient implements ClientModInitializer {
     }
 
     public static void toast(String message) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("[Skin Studio] " + message));
+        Minecraft.getInstance().gui.hud.getChat().addMessage(Component.literal("[Skin Studio] " + message));
     }
 }

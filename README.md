@@ -1,21 +1,21 @@
 # Skin Studio
 
-A client-side Fabric mod for Minecraft Java Edition 1.21.1. Import a skin, validate and cache it locally, keep favorites, upload it to MineSkin after explicit consent, then review and deliberately send a SkinsRestorer URL command.
+A client-side Fabric mod for Minecraft Java Edition 26.3. Import a skin, validate and cache it locally, keep favorites, upload it to MineSkin after explicit consent, then review and deliberately send a SkinsRestorer URL command.
 
 ## Requirements
 
-- Minecraft Java Edition 1.21.1
-- Fabric Loader 0.16.10 or newer
-- Fabric API for 1.21.1
-- Java 21
+- Minecraft Java Edition 26.3
+- Fabric Loader 0.20.1 or newer
+- Fabric API 0.165.0+26.3
+- Java 25
 
 ## Build
 
-Install JDK 21 or newer and run `gradlew.bat build` on Windows (or `./gradlew build` on macOS/Linux). The project compiles to Java 21 bytecode for Minecraft 1.21.1. The release JAR is written to `build/libs/skin-studio-0.1.0.jar`. Put that JAR and Fabric API in the Minecraft `mods` folder.
+Install JDK 25 and run `gradlew.bat build` on Windows (or `./gradlew build` on macOS/Linux). The project compiles to Java 25 bytecode for Minecraft 26.3. The release JAR is written to `build/libs/skin-studio-0.1.0.jar`. Put that JAR and Fabric API in the Minecraft `mods` folder.
 
-## Build on GitHub
+### Build for another Minecraft version
 
-Push the project to a GitHub repository. The **Build Skin Studio** workflow runs on each push and pull request, and can also be started from the repository's **Actions** tab. When it succeeds, open that run and download the `skin-studio-1.21.1` artifact. The artifact contains the installable mod JAR.
+Builds are version-specific. To make a build for a different game version, update `minecraft_version`, `loader_version`, and `fabric_api_version` in `gradle.properties` to compatible releases, use the Java version required by that Minecraft release, and update the source code for any changed Minecraft or Fabric APIs. Minecraft 26.1 and newer use Mojang's unobfuscated names; older releases use Yarn mappings and need a separate source migration. Run the Gradle wrapper after making the changes and install the resulting JAR only in a matching Fabric instance.
 
 ## Use
 
