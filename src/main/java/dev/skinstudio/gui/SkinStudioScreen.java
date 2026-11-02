@@ -71,18 +71,18 @@ public final class SkinStudioScreen extends Screen {
 
     private void initLibrary(int left) {
         addDrawableChild(ButtonWidget.builder(Text.literal(favoriteOnly ? "Show all" : "Favorites"), b -> {
-            favoriteOnly = !favoriteOnly; clearAndInit();
+            favoriteOnly = !favoriteOnly; rebuildWidgets();
         }).dimensions(left + 310, 78, 96, 20).build());
         List<SkinEntry> entries = SkinStudioClient.LIBRARY.entries().stream().filter(e -> !favoriteOnly || e.favorite).limit(7).toList();
         int y = 106;
         for (SkinEntry entry : entries) {
             int rowY = y;
             addDrawableChild(ButtonWidget.builder(Text.literal((entry.favorite ? "★ " : "☆ ") + shorten(entry.displayName, 21)), b -> {
-                SkinStudioClient.LIBRARY.setFavorite(entry.id, !entry.favorite); clearAndInit();
+                SkinStudioClient.LIBRARY.setFavorite(entry.id, !entry.favorite); rebuildWidgets();
             }).dimensions(left, rowY, 200, 20).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Select"), b -> { selected = entry; page = Page.IMPORT; previewPixels = null; uploadValue = null; uploadedSkinId = null; clearAndInit(); })
+            addDrawableChild(ButtonWidget.builder(Text.literal("Select"), b -> { selected = entry; page = Page.IMPORT; previewPixels = null; uploadValue = null; uploadedSkinId = null; rebuildWidgets(); })
                     .dimensions(left + 206, rowY, 70, 20).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Remove"), b -> { SkinStudioClient.LIBRARY.remove(entry.id); if (selected == entry) selected = null; clearAndInit(); })
+            addDrawableChild(ButtonWidget.builder(Text.literal("Remove"), b -> { SkinStudioClient.LIBRARY.remove(entry.id); if (selected == entry) selected = null; rebuildWidgets(); })
                     .dimensions(left + 282, rowY, 75, 20).build());
             y += 24;
         }
@@ -107,7 +107,7 @@ public final class SkinStudioScreen extends Screen {
         SkinStudioClient.RESOLVER.resolve(selectedSource, input.getText()).whenComplete((entry, error) -> client.execute(() -> {
             busy = false;
             if (error != null) status = rootMessage(error);
-            else { selected = entry; uploadValue = null; uploadedSkinId = null; status = "Validated " + entry.width + "×" + entry.height + " PNG from " + entry.sourceType + "."; loadPreview(); clearAndInit(); }
+            else { selected = entry; uploadValue = null; uploadedSkinId = null; status = "Validated " + entry.width + "×" + entry.height + " PNG from " + entry.sourceType + "."; loadPreview(); rebuildWidgets(); }
         }));
     }
 
@@ -157,8 +157,8 @@ public final class SkinStudioScreen extends Screen {
         status = "Saved command profile for " + SkinStudioClient.serverAddress() + ".";
     }
 
-    private void changePage(Page next) { page = next; clearAndInit(); }
-    private void clearAndInit() { clearChildren(); init(); }
+    private void changePage(Page next) { page = next; rebuildWidgets(); }
+    private void rebuildWidgets() { clearChildren(); init(); }
     private String rootMessage(Throwable error) { Throwable value = error; while (value.getCause() != null) value = value.getCause(); return value.getMessage() == null ? "Import failed." : value.getMessage(); }
     private String shorten(String s, int n) { return s.length() <= n ? s : s.substring(0, n - 1) + "…"; }
 
