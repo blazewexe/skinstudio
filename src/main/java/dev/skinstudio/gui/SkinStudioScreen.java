@@ -158,7 +158,6 @@ public final class SkinStudioScreen extends Screen {
     }
 
     private void changePage(Page next) { page = next; rebuildWidgets(); }
-    private void rebuildWidgets() { clearChildren(); init(); }
     private String rootMessage(Throwable error) { Throwable value = error; while (value.getCause() != null) value = value.getCause(); return value.getMessage() == null ? "Import failed." : value.getMessage(); }
     private String shorten(String s, int n) { return s.length() <= n ? s : s.substring(0, n - 1) + "…"; }
 

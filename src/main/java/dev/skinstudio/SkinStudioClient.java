@@ -55,6 +55,6 @@ public final class SkinStudioClient implements ClientModInitializer {
     }
 
     public static void toast(String message) {
-        Minecraft.getInstance().gui.hud.getChat().addMessage(Component.literal("[Skin Studio] " + message));
+        Minecraft.getInstance().gui.hud.setOverlayMessage(Component.literal("[Skin Studio] " + message), false);
     }
 }
